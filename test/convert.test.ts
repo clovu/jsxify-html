@@ -43,4 +43,19 @@ describe('should', () => {
     const htmlToConvert = html`Hello World!`
     expect(convert(htmlToConvert)).toBe(`"Hello World!"`)
   })
+
+  it('works with only comment', () => {
+    const htmlToConvert = html`<!-- This is a comment. -->`
+    expect(convert(htmlToConvert)).toBe(`{ /* This is a comment. */ }`)
+  })
+
+  it('works with singular tags', () => {
+    const htmlToConvert = html`<div>Hello <br /> World!</div>`
+    expect(convert(htmlToConvert)).toBe(`<div>Hello <br /> World!</div>`)
+  })
+
+  it('slef-closes emepty element', () => {
+    const htmlToConvert = html`<div></div>`
+    expect(convert(htmlToConvert)).toBe(`<div />`)
+  })
 })

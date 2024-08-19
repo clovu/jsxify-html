@@ -4,13 +4,16 @@ import { ElementType } from 'domelementtype'
 import generate from '@babel/generator'
 
 import type {
+  BlockStatement,
   ExpressionStatement,
   JSXElement,
   JSXExpressionContainer,
   JSXText,
+  Node,
 } from '@babel/types'
 import {
   addComment,
+  blockStatement,
   expressionStatement,
   jsxClosingElement,
   jsxClosingFragment,
@@ -38,7 +41,7 @@ export function convert(html?: string): undefined | string {
   const $ = cheerio.load('', { xml: true })
   const htmlAst = $.parseHTML(html!)
 
-  let babelAst: ExpressionStatement
+  let babelAst: Node
 
   if (htmlAst.length === 1) {
     babelAst = htmlToBabelAst(htmlAst[0], true)
@@ -61,24 +64,30 @@ export function convert(html?: string): undefined | string {
   return babelCode
 }
 
-function htmlToBabelAst(node: ChildNode, isTopLevel: true): ExpressionStatement
-function htmlToBabelAst(node: ChildNode, isTopLevel: false): (JSXElement | JSXExpressionContainer | JSXText)[]
-function htmlToBabelAst(node: ChildNode, isTopLevel: boolean): ExpressionStatement | (JSXElement | JSXExpressionContainer | JSXText)[] {
+function htmlToBabelAst(node: ChildNode, isRoot: true): ExpressionStatement | BlockStatement
+function htmlToBabelAst(node: ChildNode, isRoot: false): (JSXElement | JSXExpressionContainer | JSXText)[]
+function htmlToBabelAst(node: ChildNode, isRoot: boolean): ExpressionStatement | BlockStatement | (JSXElement | JSXExpressionContainer | JSXText)[] {
   if (node.type === ElementType.Tag) {
     const element = createJSXElement(node.name, node.attribs, node.childNodes)
-    if (isTopLevel)
+    if (isRoot)
       return expressionStatement(element)
     return [element]
   }
 
   if (node.type === ElementType.Text) {
     const nodeValue = node.nodeValue
-    return isTopLevel
+    return isRoot
       ? expressionStatement(stringLiteral(nodeValue))
       : [jsxText(encodeText(nodeValue))]
   }
 
   if (node.type === ElementType.Comment) {
+    if (isRoot) {
+      const block = blockStatement([])
+      addComment(block, 'inner', node.data, false)
+
+      return block
+    }
     const emptyExpression = jsxEmptyExpression()
     addComment(emptyExpression, 'inner', node.data, false)
     return [jsxExpressionContainer(emptyExpression)]
