@@ -6,4 +6,9 @@ describe('should', () => {
     const jsx = convert(`<div class="container active" style="color: red; padding: 10px; border: 1px solid #000; --bg-color: #fff"></div>`)
     expect(jsx).toEqual(`<div className="container active" style={{ color: "red", padding: 10, border: "1px solid #000", "--bg-color": "#fff" }} />`)
   })
+
+  it('has text node', () => {
+    const jsx = convert(`<div>hello world</div>`)
+    expect(jsx).toEqual(`<div>hello world</div>`)
+  })
 })
