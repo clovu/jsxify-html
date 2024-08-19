@@ -91,4 +91,10 @@ describe('should', () => {
 
     expect(convert(htmlToConvert)).toBe(`<div style={{ padding: 10, height: 15, width: 20 }}>HelloWorld</div>`)
   })
+
+  it('works with adjacent elements', () => {
+    const htmlToConvert = html`<div>Hello World</div> -- <div>Hello World</div>`
+
+    expect(convert(htmlToConvert)).toBe(`<><div>Hello World</div> -- <div>Hello World</div></>`)
+  })
 })
