@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { convert } from '../src/convert'
+import possibleStandardNames from '../src/attributes'
 
 /** Template literal for auto formatting */
 function html(
@@ -57,5 +58,31 @@ describe('should', () => {
   it('slef-closes emepty element', () => {
     const htmlToConvert = html`<div></div>`
     expect(convert(htmlToConvert)).toBe(`<div />`)
+  })
+
+  it('converts class to className', () => {
+    const htmlToConvert = html`<div class="container">HelloWorld!</div>`
+    expect(convert(htmlToConvert)).toBe(`<div className="container">HelloWorld!</div>`)
+  })
+
+  it('style string to object', () => {
+    const htmlToConvert = html`<div style="color: red; background: red;">HelloWorld!</div>`
+    expect(convert(htmlToConvert)).toBe(`<div style={{ color: "red", background: "red" }}>HelloWorld!</div>`)
+  })
+
+  it('converts react attributes', () => {
+    let [htmlAttrs, jsxAttrs] = ['', '']
+
+    for (const [htmlName, reactName] of possibleStandardNames) {
+      if (htmlName === 'style' || htmlName === 'class')
+        continue
+
+      htmlAttrs += ` ${htmlName}="s"`
+      jsxAttrs += ` ${reactName}="s"`
+    }
+
+    const htmlToConvert = html`<div${htmlAttrs}>HelloWorld</div>`
+
+    expect(convert(htmlToConvert)).toBe(`<div${jsxAttrs}>HelloWorld</div>`)
   })
 })
