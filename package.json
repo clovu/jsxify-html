@@ -51,6 +51,7 @@
     "@babel/types": "^7.25.2",
     "cheerio": "^1.0.0",
     "domelementtype": "^2.3.0",
+    "html-entities": "^2.5.2",
     "style-to-object": "^1.0.6"
   },
   "devDependencies": {
