@@ -4,6 +4,8 @@ import { ElementType } from 'domelementtype'
 import generate from '@babel/generator'
 
 import type {
+  Expression,
+  JSXAttribute,
   JSXElement,
   ObjectProperty,
 } from '@babel/types'
@@ -16,12 +18,14 @@ import {
   jsxIdentifier,
   jsxOpeningElement,
   numericLiteral,
+  objectExpression,
   objectProperty,
   stringLiteral,
 } from '@babel/types'
 import parseStyleString from 'style-to-object'
 
 import * as utils from './utils'
+import possibleStandardNames from './attributes'
 
 export function convert(html?: string): undefined | string {
   if (!utils.hasString(html))
@@ -37,11 +41,7 @@ export function convert(html?: string): undefined | string {
   if (!babelAst)
     return
 
-  // console.log('generate', generate(babelAst, { concise: true }).code)
-
   return generate(babelAst, { concise: true }).code
-
-  // return `<div className="container active" style={{color: 'red', padding: 10, border: '1px solid #000', '--bg-color': '#fff'}}>hello</div>`
 }
 
 function htmlToBabelAst(node: AnyNode): JSXElement | undefined {
@@ -53,36 +53,43 @@ function htmlToBabelAst(node: AnyNode): JSXElement | undefined {
 const MATCH_PX_VALUE = /^(\d+)px$/
 
 function createJSXElement(tagName: string, attribs: Record<string, string | number>): JSXElement {
-  const attributes = utils.map(attribs, (key, value) => {
+  const attributes = utils.map(attribs, (attributeName, attributeValue) => {
     const properties: Array<ObjectProperty> = []
 
-    if (key === 'style') {
-      parseStyleString(value as string, (name, value) => {
+    if (attributeName === 'style') {
+      parseStyleString(attributeValue as string, (name, value) => {
         const pxValueMatch = value.match(MATCH_PX_VALUE)
         properties.push(
           objectProperty(
-            identifier(name),
+            identifier(camelize(name)),
             pxValueMatch !== null
               ? numericLiteral(Number(pxValueMatch[1]))
               : stringLiteral(value),
           ),
         )
       })
+
+      return createJSXAttribute(attributeName, objectExpression(properties))
     }
 
-    if (value === null)
-      return jsxAttribute(jsxIdentifier(key), null)
+    if (possibleStandardNames.has(attributeName)) {
+      const jsxName = possibleStandardNames.get(attributeName)!
+      return createJSXAttribute(jsxName, attributeValue)
+    }
 
-    switch (typeof value) {
+    if (attributeValue === null)
+      return jsxAttribute(jsxIdentifier(attributeName), null)
+
+    switch (typeof attributeValue) {
       case 'number':
         return jsxAttribute(
-          jsxIdentifier(key),
-          jsxExpressionContainer(numericLiteral(value)),
+          jsxIdentifier(attributeName),
+          jsxExpressionContainer(numericLiteral(attributeValue)),
         )
       case 'string':
-        return jsxAttribute(jsxIdentifier(key), stringLiteral(value))
+        return jsxAttribute(jsxIdentifier(attributeName), stringLiteral(attributeValue))
       default:
-        return jsxAttribute(jsxIdentifier(key), jsxExpressionContainer(value))
+        return jsxAttribute(jsxIdentifier(attributeName), jsxExpressionContainer(attributeValue))
     }
   })
 
@@ -92,4 +99,33 @@ function createJSXElement(tagName: string, attribs: Record<string, string | numb
     // jsxAttribute(objectExpression(properties)),
     [],
   )
+}
+
+function createJSXAttribute(name: string, value: string | number | Expression): JSXAttribute {
+  if (value == null)
+    return jsxAttribute(jsxIdentifier(name), null)
+
+  switch (typeof value) {
+    case 'number':
+      return jsxAttribute(
+        jsxIdentifier(name),
+        jsxExpressionContainer(numericLiteral(value)),
+      )
+    case 'string':
+      return jsxAttribute(jsxIdentifier(name), stringLiteral(value))
+    default:
+      return jsxAttribute(jsxIdentifier(name), jsxExpressionContainer(value))
+  }
+}
+
+const CAMELIZE = /[\-:]([a-z])/g
+const capitalize = (token: string): string => token[1]?.toUpperCase()
+
+const IS_CSS_VARIBALE = /^--\w+/
+
+function camelize(str: string): string {
+  // Skip the attribute if it is a css variable. e.g. style="--bgColor: red"
+  if (IS_CSS_VARIBALE.test(str))
+    return `"${str}"`
+  return str.replace(CAMELIZE, capitalize)
 }
