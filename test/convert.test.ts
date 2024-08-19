@@ -85,4 +85,10 @@ describe('should', () => {
 
     expect(convert(htmlToConvert)).toBe(`<div${jsxAttrs}>HelloWorld</div>`)
   })
+
+  it('converts style tag includes px values to numbers', () => {
+    const htmlToConvert = html`<div style="padding: 10px; height: 15px; width: 20px;">HelloWorld</div>`
+
+    expect(convert(htmlToConvert)).toBe(`<div style={{ padding: 10, height: 15, width: 20 }}>HelloWorld</div>`)
+  })
 })
