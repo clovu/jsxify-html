@@ -4,16 +4,25 @@ import { ElementType } from 'domelementtype'
 import generate from '@babel/generator'
 
 import type {
+  ExpressionStatement,
   JSXElement,
-  JSXFragment,
+  JSXExpressionContainer,
   JSXText,
 } from '@babel/types'
 import {
+  addComment,
+  expressionStatement,
   jsxClosingElement,
+  jsxClosingFragment,
   jsxElement,
+  jsxEmptyExpression,
+  jsxExpressionContainer,
+  jsxFragment,
   jsxIdentifier,
   jsxOpeningElement,
+  jsxOpeningFragment,
   jsxText,
+  stringLiteral,
 } from '@babel/types'
 import { encode } from 'html-entities'
 
@@ -29,31 +38,65 @@ export function convert(html?: string): undefined | string {
   const $ = cheerio.load('', { xml: true })
   const htmlAst = $.parseHTML(html!)
 
-  const babelAst = htmlToBabelAst(htmlAst[0])
+  let babelAst: ExpressionStatement
 
-  if (!babelAst)
-    return
+  if (htmlAst.length === 1) {
+    babelAst = htmlToBabelAst(htmlAst[0], true)
+  }
+  else {
+    babelAst = expressionStatement(
+      jsxFragment(
+        jsxOpeningFragment(),
+        jsxClosingFragment(),
+        htmlAst.flatMap(childNode => htmlToBabelAst(childNode, false)),
+      ),
+    )
+  }
 
-  return generate(babelAst, { concise: true }).code
+  let babelCode = generate(babelAst, { concise: true }).code
+
+  if (babelCode.endsWith(';'))
+    babelCode = babelCode.slice(0, -1)
+
+  return babelCode
 }
 
-function htmlToBabelAst(node: ChildNode): JSXElement | JSXFragment | JSXText | undefined {
-  if (node.type === ElementType.Tag)
-    return createJSXElement(node.name, node.attribs, node.childNodes)
+function htmlToBabelAst(node: ChildNode, isTopLevel: true): ExpressionStatement
+function htmlToBabelAst(node: ChildNode, isTopLevel: false): (JSXElement | JSXExpressionContainer | JSXText)[]
+function htmlToBabelAst(node: ChildNode, isTopLevel: boolean): ExpressionStatement | (JSXElement | JSXExpressionContainer | JSXText)[] {
+  if (node.type === ElementType.Tag) {
+    const element = createJSXElement(node.name, node.attribs, node.childNodes)
+    if (isTopLevel)
+      return expressionStatement(element)
+    return [element]
+  }
 
   if (node.type === ElementType.Text) {
     const nodeValue = node.nodeValue
-    // return jsxFragment(jsxOpeningFragment(), jsxClosingFragment(), [jsxText(encodeText(nodeValue))])
-    return jsxText(encodeText(nodeValue))
+    return isTopLevel
+      ? expressionStatement(stringLiteral(nodeValue))
+      : [jsxText(encodeText(nodeValue))]
   }
+
+  if (node.type === ElementType.Comment) {
+    const emptyExpression = jsxEmptyExpression()
+    addComment(emptyExpression, 'inner', node.data, false)
+    return [jsxExpressionContainer(emptyExpression)]
+  }
+
+  throw new Error(`Unknown node type: ${node.type}`)
 }
 
 function createJSXElement(tagName: string, attribs: Record<string, string | number>, children: ChildNode[]): JSXElement {
   const hasChildNodes = children.length > 0
   return jsxElement(
-    jsxOpeningElement(jsxIdentifier(tagName), convertAttribute(attribs), !hasChildNodes),
+    jsxOpeningElement(
+      jsxIdentifier(tagName),
+      convertAttribute(attribs),
+      !hasChildNodes,
+    ),
     jsxClosingElement(jsxIdentifier(tagName)),
-    children.flatMap(node => htmlToBabelAst(node)!).filter(Boolean),
+    children.flatMap(node => htmlToBabelAst(node, false)!).filter(Boolean),
   )
 }
 
