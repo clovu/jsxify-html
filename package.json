@@ -17,6 +17,7 @@
     "start:demo": "pnpm -C examples run dev",
     "build:convert": "pnpm -C packages/convert run build",
     "build:demo": "pnpm build:convert && pnpm -C examples run build",
+    "build": "build:convert",
     "dev": "pnpm -C packages/convert run dev",
     "lint": "eslint .",
     "prepublishOnly": "nr build",
