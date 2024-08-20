@@ -3,7 +3,7 @@ import { ConvertTextarea } from './ConvertTextarea'
 
 export default function Home(): JSX.Element {
   return (
-    <div>
+    <div className="h-screen">
       <ConvertTextarea />
     </div>
   )
