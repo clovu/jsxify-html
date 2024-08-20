@@ -1,23 +1,29 @@
 {
   "name": "@html2jsx/convert",
   "type": "module",
-  "version": "1.0.0",
-  "description": "",
-  "author": "",
-  "license": "ISC",
+  "version": "0.0.1",
+  "packageManager": "pnpm@9.7.1",
+  "description": "A library for converting an HTML string into a JSX string using ASTs.",
+  "author": "Clover You <2621869236@qq.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/clover-you/html2jsx#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clover-you/html2jsx.git"
+  },
+  "bugs": "https://github.com/clover-you/html2jsx/issues",
   "keywords": [],
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./*": "./*"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
   },
-
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
       "*": [
@@ -26,8 +32,11 @@
       ]
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsup src/index.ts",
+    "build": "unbuild",
     "dev": "unbuild --stub",
     "lint": "eslint .",
     "prepublishOnly": "nr build",
@@ -38,8 +47,8 @@
     "prepare": "simple-git-hooks"
   },
   "dependencies": {
-    "@babel/generator": "^7.25.0",
-    "@babel/types": "^7.25.2",
+    "@babel/generator": "8.0.0-alpha.12",
+    "@babel/types": "8.0.0-alpha.12",
     "@types/babel__generator": "^7.6.8",
     "cheerio": "^1.0.0",
     "domelementtype": "^2.3.0",
