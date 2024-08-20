@@ -13,9 +13,6 @@
   "bugs": "https://github.com/clover-you/html2jsx/issues",
   "keywords": [],
   "sideEffects": false,
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "start:demo": "pnpm -C examples run dev",
     "build:convert": "pnpm -C packages/convert run build",
