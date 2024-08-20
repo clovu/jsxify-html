@@ -3,7 +3,7 @@
 import { Editor } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { useRef } from 'react'
-import { convert } from '@html2jsx/convert'
+import { convert } from '@clover-you/html2jsx'
 
 export function ConvertTextarea(): JSX.Element {
   const previewEditorRef = useRef<editor.IStandaloneCodeEditor>()
