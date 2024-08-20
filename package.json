@@ -29,9 +29,6 @@
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
   },
-  "dependencies": {
-    "@babel/generator": "^7.25.0"
-  },
   "devDependencies": {
     "@antfu/eslint-config": "^2.26.0",
     "@antfu/ni": "^0.22.4",
