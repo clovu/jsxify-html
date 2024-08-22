@@ -59,7 +59,7 @@ importers:
 
   examples:
     dependencies:
-      '@clover-you/html2jsx':
+      '@clover/jsxify-html':
         specifier: workspace:^
         version: link:../packages/convert
       '@monaco-editor/react':
