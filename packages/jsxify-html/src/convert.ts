@@ -78,7 +78,7 @@ function htmlToBabelAst(node: ChildNode, isRoot: boolean): ExpressionStatement |
     const nodeValue = node.nodeValue
     return isRoot
       ? expressionStatement(stringLiteral(nodeValue))
-      : [jsxText(encodeText(nodeValue))]
+      : [jsxText(encodeText(nodeValue).replace(/(\{+|\}+)/g, '{"$1"}'))]
   }
 
   if (node.type === ElementType.Comment) {

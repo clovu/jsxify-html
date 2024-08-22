@@ -97,4 +97,10 @@ describe('should', () => {
 
     expect(convert(htmlToConvert)).toBe(`<><div>Hello World</div> -- <div>Hello World</div></>`)
   })
+
+  it('works with {}', () => {
+    const htmlToConvert = html`<code>function () { console.log('Hello World!') }</code>`
+
+    expect(convert(htmlToConvert)).toBe(`<code>function () {"{"} console.log(&apos;Hello World!&apos;) {"}"}</code>`)
+  })
 })
