@@ -14,15 +14,11 @@
   "keywords": [],
   "sideEffects": false,
   "scripts": {
-    "start:demo": "pnpm -C examples run dev",
-    "build:convert": "pnpm -C packages/convert run build",
-    "build:demo": "pnpm build:convert && pnpm -C examples run build",
-    "build": "build:convert",
-    "dev": "pnpm -C packages/convert run dev",
+    "start": "pnpm -C examples run dev",
+    "build": "pnpm -r run build",
     "lint": "eslint .",
     "prepublishOnly": "nr build",
     "release": "bumpp && pnpm -r publish --access=public",
-    "start": "esno src/index.ts",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"

@@ -64,7 +64,7 @@ importers:
         version: 4.6.0(monaco-editor@0.50.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       jsxify-html:
         specifier: workspace:^
-        version: link:../packages/convert
+        version: link:../packages/jsxify-html
       monaco-editor:
         specifier: ^0.50.0
         version: 0.50.0
@@ -103,7 +103,7 @@ importers:
         specifier: ^5
         version: 5.5.4
 
-  packages/convert:
+  packages/jsxify-html:
     dependencies:
       '@babel/generator':
         specifier: 8.0.0-alpha.12
