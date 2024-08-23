@@ -103,4 +103,10 @@ describe('should', () => {
 
     expect(convert(htmlToConvert)).toBe(`<code>function () {"{"} console.log(&apos;Hello World!&apos;) {"}"}</code>`)
   })
+
+  it('render pre tag with dangerouslySetInnerHTML', () => {
+    const htmlToConvert = html`<div><pre><code>function () { console.log('Hello World!') }</code></pre></div>`
+
+    expect(convert(htmlToConvert)).toBe(`<div><pre dangerouslySetInnerHTML={{ __html: "<code>function () { console.log('Hello World!') }</code>" }} /></div>`)
+  })
 })

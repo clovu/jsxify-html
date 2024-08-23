@@ -62,7 +62,7 @@ export function convertAttribute(attributes: Record<string, string | number>): J
   })
 }
 
-function createJSXAttribute(name: string, value: string | number | Expression): JSXAttribute {
+export function createJSXAttribute(name: string, value: string | number | Expression): JSXAttribute {
   if (value == null)
     return jsxAttribute(jsxIdentifier(name), null)
 

@@ -15,6 +15,7 @@ import {
   addComment,
   blockStatement,
   expressionStatement,
+  identifier,
   jsxClosingElement,
   jsxClosingFragment,
   jsxElement,
@@ -25,12 +26,14 @@ import {
   jsxOpeningElement,
   jsxOpeningFragment,
   jsxText,
+  objectExpression,
+  objectProperty,
   stringLiteral,
 } from '@babel/types'
 import { encode } from 'html-entities'
 
 import * as utils from './utils'
-import { convertAttribute } from './convert-attribute'
+import { convertAttribute, createJSXAttribute } from './convert-attribute'
 
 export function convert(html?: string): undefined | string {
   if (!utils.hasString(html))
@@ -41,20 +44,7 @@ export function convert(html?: string): undefined | string {
   const $ = cheerio.load('', { xml: true })
   const htmlAst = $.parseHTML(html!)
 
-  let babelAst: Node
-
-  if (htmlAst.length === 1) {
-    babelAst = htmlToBabelAst(htmlAst[0], true)
-  }
-  else {
-    babelAst = expressionStatement(
-      jsxFragment(
-        jsxOpeningFragment(),
-        jsxClosingFragment(),
-        htmlAst.flatMap(childNode => htmlToBabelAst(childNode, false)),
-      ),
-    )
-  }
+  const babelAst = wrapWithFragment(htmlAst)
 
   let babelCode = generate(babelAst, { concise: true }).code
 
@@ -62,6 +52,20 @@ export function convert(html?: string): undefined | string {
     babelCode = babelCode.slice(0, -1)
 
   return babelCode
+}
+
+function wrapWithFragment(ast: ChildNode[]): Node {
+  if (ast.length === 1) {
+    return htmlToBabelAst(ast[0], true)
+  }
+
+  return expressionStatement(
+    jsxFragment(
+      jsxOpeningFragment(),
+      jsxClosingFragment(),
+      ast.flatMap(childNode => htmlToBabelAst(childNode, false)),
+    ),
+  )
 }
 
 function htmlToBabelAst(node: ChildNode, isRoot: true): ExpressionStatement | BlockStatement
@@ -98,6 +102,28 @@ function htmlToBabelAst(node: ChildNode, isRoot: boolean): ExpressionStatement |
 
 function createJSXElement(tagName: string, attribs: Record<string, string | number>, children: ChildNode[]): JSXElement {
   const hasChildNodes = children.length > 0
+
+  if (tagName === 'pre') {
+    const htmlString = `${cheerio.load('').html(children)}`
+
+    const preAttr = createJSXAttribute('dangerouslySetInnerHTML', objectExpression([
+      objectProperty(identifier('__html'), stringLiteral(htmlString)),
+    ]))
+
+    const mergeAttrs = [...convertAttribute(attribs), preAttr]
+
+    return jsxElement(
+      jsxOpeningElement(
+        jsxIdentifier('pre'),
+        mergeAttrs,
+        true,
+      ),
+      null,
+      [],
+    )
+  }
+
+  // generate(childrenJsxElements, { concise: true })
   return jsxElement(
     jsxOpeningElement(
       jsxIdentifier(tagName),
