@@ -11,7 +11,13 @@
     "url": "git+https://github.com/clover-you/jsxify-html.git"
   },
   "bugs": "https://github.com/clover-you/jsxify-html/issues",
-  "keywords": [],
+  "keywords": [
+    "html",
+    "jsx",
+    "react",
+    "transformer",
+    "converter"
+  ],
   "sideEffects": false,
   "scripts": {
     "start": "pnpm -C examples run dev",
