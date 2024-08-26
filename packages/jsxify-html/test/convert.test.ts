@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { convert } from '../src/convert'
+import { JsxifyHtml, convert } from '../src/convert'
 import possibleStandardNames from '../src/attributes'
 
 /** Template literal for auto formatting */
@@ -98,6 +98,12 @@ describe('should', () => {
     expect(convert(htmlToConvert)).toBe(`<><div>Hello World</div> -- <div>Hello World</div></>`)
   })
 
+  it('tag name are not processed', () => {
+    const htmlToConvert = html`<Hello>Hello World</Hello>`
+
+    expect(convert(htmlToConvert)).toBe(`<Hello>Hello World</Hello>`)
+  })
+
   it('works with {}', () => {
     const htmlToConvert = html`<code>function () { console.log('Hello World!') }</code>`
 
@@ -107,6 +113,7 @@ describe('should', () => {
   it('render pre tag with dangerouslySetInnerHTML', () => {
     const htmlToConvert = html`<div><pre><code>function () { console.log('Hello World!') }</code></pre></div>`
 
-    expect(convert(htmlToConvert)).toBe(`<div><pre dangerouslySetInnerHTML={{ __html: "<code>function () { console.log('Hello World!') }</code>" }} /></div>`)
+    const result = new JsxifyHtml({ preservePreTags: true, xml: true }).convert(htmlToConvert)
+    expect(result).toBe(`<div><pre dangerouslySetInnerHTML={{ __html: "<code>function () { console.log(&apos;Hello World!&apos;) }</code>" }} /></div>`)
   })
 })
