@@ -1,6 +1,6 @@
 # jsxify-html
 
-`jsxify-html` is a lightweight utility that converts HTML strings into JSX syntax, making it easier to integrate HTML content into React components. The library also handles content within `<pre>` tags by rendering it with `dangerouslySetInnerHTML`, preserving the original formatting.
+`jsxify-html` is a utility that converts HTML strings into JSX syntax, making it easier to integrate HTML content into React components. It offers customization options through the `JsxifyHtml` class, allowing users to control specific aspects of the conversion process.
 
 ## Installation
 
@@ -18,46 +18,90 @@ pnpm add jsxify-html
 
 ## Usage
 
-Import the `convert` function and use it to convert your HTML string to JSX:
+### Basic Usage with `convert` Function
+
+The simplest way to use `jsxify-html` is through the `convert` function:
 
 ```ts
 import { convert } from 'jsxify-html'
 
-const jsx = convert(`<div>Hello World</div>`)
+const jsx = convert('<div>Hello World</div>')
 ```
 
-### Handling `<pre>` Tags
+### Advanced Usage with `JsxifyHtml` Class
 
-The `convert` function ensures that content within `<pre>` tags is rendered using `dangerouslySetInnerHTML` to maintain the original formatting. This is particularly useful when dealing with preformatted text, as React would otherwise strip out important whitespace and line breaks.
-
-## API
-
-### `convert(html?: string): undefined | string`
-
-- `html`: The HTML string you want to convert to JSX.
-- Returns: The converted JSX string or `undefined` if no HTML string is provided.
-
-## Example
+For more control over the conversion process, you can create an instance of the `JsxifyHtml` class with custom options:
 
 ```ts
-import { convert } from 'jsxify-html'
+import { JsxifyHtml } from 'jsxify-html'
 
-const htmlContent = `
+const jsxifier = new JsxifyHtml({
+  preservePreTags: true,
+  xml: true
+})
+
+const jsx = jsxifier.convert('<div>Hello World</div>')
+```
+
+## Options
+
+The `JsxifyHtml` class accepts an `Options` object to customize its behavior:
+
+```ts
+interface Options {
+  /**
+   * Preserves the formatting within <pre> tags when set to true.
+   */
+  preservePreTags?: boolean
+  /**
+   * Recommended way of configuring htmlparser2 when wanting to parse XML.
+   */
+  xml?: boolean
+}
+```
+
+### Option Details
+
+- **`preservePreTags`**: When `true`, the content within `<pre>` tags will be preserved with its original formatting.
+- **`xml`**: If set to `true`, the parser is configured to handle XML parsing, which may be necessary depending on the HTML content.
+
+### Example
+
+```ts
+import { JsxifyHtml } from 'jsxify-html'
+
+const jsxifier = new JsxifyHtml({
+  preservePreTags: false,
+  xml: true
+})
+
+const jsx = jsxifier.convert(`
   <div>
-    <h1>Welcome to jsxify-html</h1>
+    <h1>Title</h1>
     <pre>
       function helloWorld() {
         console.log("Hello, World!");
       }
     </pre>
   </div>
-`
-
-const jsx = convert(htmlContent)
-console.log(jsx)
+`)
 ```
 
-In this example, the HTML string is converted to JSX, and the content inside the `<pre>` tag is preserved with proper formatting.
+## API
+
+### `convert(html?: string): undefined | string`
+
+A convenient function that wraps the `JsxifyHtml` class for simple use cases.
+
+- `html`: The HTML string you want to convert to JSX.
+- Returns: The converted JSX string or `undefined` if no HTML string is provided.
+
+### `JsxifyHtml`
+
+The main class providing detailed control over the conversion process.
+
+- **`constructor(options?: Options)`**: Initializes the `JsxifyHtml` instance with optional configuration.
+- **`convert(html?: string): undefined | string`**: Converts the provided HTML string to JSX.
 
 ## License
 
