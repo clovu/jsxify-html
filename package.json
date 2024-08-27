@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "packageManager": "pnpm@9.7.1",
   "description": "A library for converting an HTML string into a JSX string using ASTs.",
   "author": "Clover You <2621869236@qq.com>",
