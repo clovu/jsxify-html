@@ -116,4 +116,9 @@ describe('should', () => {
     const result = new JsxifyHtml({ preservePreTags: true, xml: true }).convert(htmlToConvert)
     expect(result).toBe(`<div><pre dangerouslySetInnerHTML={{ __html: "<code>function () { console.log(&apos;Hello World!&apos;) }</code>" }} /></div>`)
   })
+
+  it('should self-closed', () => {
+    expect(convert(`<br> hello world <div>s</div>`)).toBe(`<><br /> hello world <div>s</div></>`)
+    expect(convert(`<div><br> hello world <div>s</div></div>`)).toBe(`<div><br /> hello world <div>s</div></div>`)
+  })
 })

@@ -8,6 +8,7 @@ import type {
   ExpressionStatement,
   JSXElement,
   JSXExpressionContainer,
+  JSXFragment,
   JSXText,
   Node,
 } from '@babel/types'
@@ -70,7 +71,7 @@ export class JsxifyHtml {
       jsxFragment(
         jsxOpeningFragment(),
         jsxClosingFragment(),
-        ast.flatMap(childNode => this.htmlToBabelAst(childNode, false)),
+        this.handleChildren(ast),
       ),
     )
   }
@@ -80,8 +81,22 @@ export class JsxifyHtml {
   private htmlToBabelAst(node: ChildNode, isRoot: boolean): ExpressionStatement | BlockStatement | (JSXElement | JSXExpressionContainer | JSXText)[] {
     if (node.type === ElementType.Tag) {
       const element = this.createJSXElement(node.name, node.attribs, node.childNodes)
-      if (isRoot)
+
+      if (isRoot && node.name !== 'br')
         return expressionStatement(element)
+
+      const elements = [element, ...this.handleChildren(node.childNodes)]
+
+      if (isRoot && node.name === 'br') {
+        return expressionStatement(
+          jsxFragment(
+            jsxOpeningFragment(),
+            jsxClosingFragment(),
+            elements,
+          ),
+        )
+      }
+
       return [element]
     }
 
@@ -110,6 +125,14 @@ export class JsxifyHtml {
   private createJSXElement(tagName: string, attribs: Record<string, string | number>, children: ChildNode[]): JSXElement {
     const hasChildNodes = children.length > 0
 
+    if (tagName === 'br') {
+      return jsxElement(
+        jsxOpeningElement(jsxIdentifier('br'), convertAttribute(attribs), true),
+        null,
+        [],
+      )
+    }
+
     if (tagName === 'pre' && this.options?.preservePreTags) {
       const htmlString = `${this.$.html(children)}`
 
@@ -133,12 +156,33 @@ export class JsxifyHtml {
         !hasChildNodes,
       ),
       jsxClosingElement(jsxIdentifier(tagName)),
-      children.flatMap(node => this.htmlToBabelAst(node, false)!).filter(Boolean),
+      this.handleChildren(children),
     )
   }
 
   private encodeText(text: string): string {
     return encode(text, { mode: 'nonAsciiPrintable', level: 'html5' })
+  }
+
+  private handleChildren(children: ChildNode[]): (JSXElement | JSXExpressionContainer | JSXText)[] {
+    return children.flatMap((node) => {
+      const elements = this.htmlToBabelAst(node, false)!
+
+      if (node.type === ElementType.Tag && node.name === 'br') {
+        const children = this.handleChildren(node.childNodes)
+        elements.push(...children)
+      }
+
+      return [...elements]
+    }).filter(Boolean)
+  }
+
+  private createJSXFragment(children: ChildNode[]): JSXFragment {
+    return jsxFragment(
+      jsxOpeningFragment(),
+      jsxClosingFragment(),
+      this.handleChildren(children),
+    )
   }
 }
 
