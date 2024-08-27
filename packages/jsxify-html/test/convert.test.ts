@@ -117,7 +117,7 @@ describe('should', () => {
     expect(result).toBe(`<div><pre dangerouslySetInnerHTML={{ __html: "<code>function () { console.log(&apos;Hello World!&apos;) }</code>" }} /></div>`)
   })
 
-  it('should self-closed', () => {
+  it('should convert self-closing tag', () => {
     expect(convert(`<br> hello world <div>s</div>`)).toBe(`<><br /> hello world <div>s</div></>`)
     expect(convert(`<div><br> hello world <div>s</div></div>`)).toBe(`<div><br /> hello world <div>s</div></div>`)
   })
