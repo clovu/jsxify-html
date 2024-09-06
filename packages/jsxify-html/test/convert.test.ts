@@ -121,4 +121,12 @@ describe('should', () => {
     expect(convert(`<br> hello world <div>s</div>`)).toBe(`<><br /> hello world <div>s</div></>`)
     expect(convert(`<div><br> hello world <div>s</div></div>`)).toBe(`<div><br /> hello world <div>s</div></div>`)
   })
+
+  it('htmlEntities option is working correctly.', () => {
+    expect(convert(html`<div>你好世界!</div>`)).toBe(`<div>&#20320;&#22909;&#19990;&#30028;!</div>`)
+    expect(
+      new JsxifyHtml({ htmlEntities: { mode: 'specialChars' } })
+        .convert(html`<div>输入 > 到...</div>`),
+    ).toBe(`<div>输入 &gt; 到...</div>`)
+  })
 })

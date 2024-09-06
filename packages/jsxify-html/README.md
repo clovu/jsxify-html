@@ -57,6 +57,12 @@ interface Options {
    * Recommended way of configuring htmlparser2 when wanting to parse XML.
    */
   xml?: boolean
+  /**
+   * Configures the `html-entities` plugin rules for handling HTML entities.
+   * For detailed configuration options, please refer to the documentation: <a href="https://www.npmjs.com/package/html-entities">html-entities</a>
+   * @default { mode: 'nonAsciiPrintable', level: 'html5' }
+   */
+  htmlEntities?: EncodeOptions
 }
 ```
 
@@ -64,6 +70,7 @@ interface Options {
 
 - **`preservePreTags`**: When `true`, the content within `<pre>` tags will be preserved with its original formatting.
 - **`xml`**: If set to `true`, the parser is configured to handle XML parsing, which may be necessary depending on the HTML content.
+- **`htmlEntities`**: This option allows you to customize the behavior of the html-entities library, which is used by default to handle special characters in the HTML. For more detailed configuration options, please refer to the <a href="https://www.npmjs.com/package/html-entities">html-entities documentation</a>.
 
 ### Example
 

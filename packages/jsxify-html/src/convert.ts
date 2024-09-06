@@ -161,7 +161,7 @@ export class JsxifyHtml {
   }
 
   private encodeText(text: string): string {
-    return encode(text, { mode: 'nonAsciiPrintable', level: 'html5' })
+    return encode(text, { mode: 'nonAsciiPrintable', level: 'html5', ...this.options?.htmlEntities })
   }
 
   private handleChildren(children: ChildNode[]): (JSXElement | JSXExpressionContainer | JSXText)[] {
